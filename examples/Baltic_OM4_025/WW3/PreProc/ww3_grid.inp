@@ -25,6 +25,8 @@ $ &PRO2 DTIME = 2777. /
  &PRO3 WDTHCG = 0., WDTHTH = 0. /
 $ &PRO4 RNFAC = 0., RSFAC = 0. /
   &MISC CICE0 = 0.25, CICEN = 0.75, FLAGTR = 4 /
+ &OUTS USSP = 1, IUSSP = 3,
+  STK_WN = 0.04 , 0.1102, 0.3305 /
  &GLOC READ_GRID_METRICS = .false.,
        GRID_METRIC_FILENAME = 'ocean_hgrid.nc' /
 END OF NAMELISTS
