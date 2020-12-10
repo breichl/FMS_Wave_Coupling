@@ -8,11 +8,11 @@ setenv BuildFMS 1
 #Set 1 to build ww3_grid exec (needed for creating wave model grid)
 setenv BuildWW3grid 1
 #Set 1 to build ww3_prnc exec (optional, needed to run wave model from external forcing)
-setenv BuildWW3prnc 0
+setenv BuildWW3prnc 1
 #Set 1 to build ww3_multi exec (optional, needed to run wave model in stand-alone from multi driver)
-setenv BuildWW3multi 0
+setenv BuildWW3multi 1
 #Set 1 to build ww3_shel exec (optional, needed to run wave model in stand-alone from shel driver)
-setenv BuildWW3shel 0
+setenv BuildWW3shel 1
 #Set 1 to build WW3 library for coupled model
 setenv BuildWW3lib 1
 #Set 1 to build ww3_ounf exec (optional, needed to process WW3 output to NetCDF)
@@ -34,8 +34,9 @@ if ( "$site" == "gfdl.noaa.gov" ) then
 EOF
 else if ( "$site" == "ncrc.gov" ) then
     # For intel
+    #old module swap intel intel/16.0.3.210
     setenv TEMPLATE '../../../../src/mkmf/templates/ncrc-intel.mk'
-    setenv TEMPLATE '../../../../src/mkmf/templates/ncrc-intel-WW3.mk'
+    setenv TEMPLATE_WW3 '../../../../src/mkmf/templates/ncrc-intel-WW3.mk'
     cat <<EOF > build/intel/env
     module unload PrgEnv-pgi
     module unload PrgEnv-pathscale
@@ -44,7 +45,7 @@ else if ( "$site" == "ncrc.gov" ) then
     module unload PrgEnv-cray
 
     module load PrgEnv-intel
-    module swap intel intel/16.0.3.210
+    module swap intel intel/18.0.6.288
     module unload netcdf
     module load cray-netcdf
     module load cray-hdf5
@@ -61,8 +62,8 @@ if ($BuildFMS == 1) then
     mkdir -p build/intel/FMSlib/repro/
     (cd build/intel/FMSlib/repro/; rm -f path_names;\
     ../../../../src/mkmf/bin/list_paths -l ../../../../src/FMS; \
-    ../../../../src/mkmf/bin/mkmf -t $TEMPLATE -p libfms.a -c "-Duse_libMPI -Duse_netCDF -DSPMD " path_names)
-    (cd build/intel/FMSlib/repro/; source ../../env; make NETCDF=4 REPRO=1 libfms.a -j )
+    ../../../../src/mkmf/bin/mkmf -t $TEMPLATE -p libfms.a -c "-Duse_libMPI -Duse_netCDF" path_names)
+    (cd build/intel/FMSlib/repro/; source ../../env; make NETCDF=3 REPRO=1 libfms.a -j )
 endif
 
 if ($BuildWW3grid == 1) then
