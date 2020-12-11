@@ -5,11 +5,11 @@
 To clone this repository from github use the following:
 
 > Using https:
-> git clone https://github.com/breichl/FMS_Wave_Coupling.git
+> git clone --branch Dec2020 git@github.com:breichl/FMS_Wave_Coupling.git
 
-Change to the desired branch, then update and unpack the submodules:
+Download and update the submodules:
 
-> git checkout remotes/origin/Dec2020  
+> cd FMS_Wave_Coupling  
 > git submodule update --init --recursive
 
 Now you should be ready to compile.
