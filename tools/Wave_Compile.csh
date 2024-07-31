@@ -1,7 +1,8 @@
 #!/bin/csh
 #
 
-setenv site `perl -T -e "use Net::Domain(hostdomain); print hostdomain" | sed 's/\.$//'`
+# setenv site `perl -T -e "use Net::Domain(hostdomain); print hostdomain" | sed 's/\.$//'`
+setenv site "gaea"
 
 #Set 1 to build FMS libraries (needed for coupled model)
 setenv BuildFMS 1
@@ -49,6 +50,24 @@ else if ( "$site" == "ncrc.gov" ) then
     module unload netcdf
     module load cray-netcdf
     module load cray-hdf5
+EOF
+else if ( "$site" == "gaea" ) then
+    # For intel
+    #old module swap intel intel/16.0.3.210
+    setenv TEMPLATE '../../../../src/mkmf/templates/ncrc-intel.mk'
+    setenv TEMPLATE_WW3 '../../../../src/mkmf/templates/ncrc-intel-WW3.mk'
+    echo 'Gaea'
+    cat <<EOF > build/intel/env
+    module use -a /ncrc/home2/fms/local/modulefiles
+    module unload cray-netcdf cray-hdf5 fre
+    module unload PrgEnv-pgi PrgEnv-intel PrgEnv-gnu PrgEnv-cray
+    module load PrgEnv-intel/8.3.3
+    module unload intel intel-classic intel-oneapi
+    module load intel-classic/2022.0.2
+    module load cray-hdf5/1.12.2.3
+    module load cray-netcdf/4.9.0.3
+    module load libyaml/0.2.5
+    module unload cray-libsci
 EOF
 endif
 echo '2'
