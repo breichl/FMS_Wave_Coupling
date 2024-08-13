@@ -170,9 +170,9 @@ if ($BuildMOM6 == 1) then
     #Wave-ice-ocean
     mkdir -p build/intel/wave_ice_ocean/repro/
     (cd build/intel/wave_ice_ocean/repro/; rm -f path_names; \
-		../../../../src/mkmf/bin/list_paths -l ./ ../../../../src/MOM6/config_src/{dynamic,coupled_driver} ../../../../src/MOM6/src/{*,*/*}/ ../../../../src/{atmos_null,coupler,land_null,ice_param,icebergs,SIS2,FMS/coupler,FMS/include,WW3/model/CPL}/)
+		../../../../src/mkmf/bin/list_paths -l ./ ../../../../src/MOM6/config_src/{infra/FMS2,memory/dynamic_symmetric,drivers/FMS_cap,external} ../../../../src/MOM6/src/{*,*/*}/ ../../../../src/SIS2/src/ ../../../../src/SIS2/config_src/{external/Icepack_interfaces,dynamic_symmetric} ../../../../src/{atmos_null,coupler,land_null,ice_param,icebergs/src,SIS2,FMS/coupler,FMS/include,WW3/model/CPL}/)
     (cd build/intel/wave_ice_ocean/repro/; \
-	../../../../src/mkmf/bin/mkmf -t $TEMPLATE -o '-I../../FMSlib/repro -I../../WW3lib/repro' -p MOM6 -l '-L../../FMSlib/repro -lfms -L../../WW3lib/repro -lww3' -c '-Duse_libMPI -Duse_netCDF -DSPMD -Duse_AM3_physics -D_USE_LEGACY_LAND_ ' path_names )
+	../../../../src/mkmf/bin/mkmf -t $TEMPLATE -o '-I../../FMSlib/repro -I../../WW3lib/repro' -p MOM6 -l '-L../../FMSlib/repro -lfms -L../../WW3lib/repro -lww3' -c '-Duse_libMPI -Duse_netCDF -DSPMD -Duse_AM3_physics -D_USE_LEGACY_LAND_ -DUSE_FMS2_IO ' path_names )
     (cd build/intel/wave_ice_ocean/repro/; source ../../env; make NETCDF=3 REPRO=1 MOM6 -j)
 endif
 
