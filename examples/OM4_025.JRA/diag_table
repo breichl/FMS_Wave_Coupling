@@ -8,3 +8,8 @@ OM4_025 with JRA55-do
  "ocean_model",   "MLD_user", "MLD_user"    ,   "day_mean", "all", "mean", "none", 2
  "ocean_model",   "MLD_003", "MLD_003"    ,   "day_mean", "all", "mean", "none", 2
  "ocean_model",   "MLD_0125", "MLD_0125"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MSTAR", "MSTAR"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MSTAR_LT", "MSTAR_LT"    ,   "day_mean", "all", "mean", "none", 2 
+ #"ocean_model",   "LA_TURBULENT", "LA_TURBULENT"    ,   "day_mean", "all", "mean", "none", 2 
+ "ocean_model",   "surface_stokes_x", "surface_stokes_x"    ,   "day_mean", "all", "mean", "none", 2 
+ "ocean_model",   "surface_stokes_y", "surface_stokes_y"    ,   "day_mean", "all", "mean", "none", 2 
