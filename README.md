@@ -5,7 +5,7 @@
 To clone this repository from github use the following:
 
 > Using https:
-> git clone --branch Dec2020 git@github.com:breichl/FMS_Wave_Coupling.git
+> git clone --branch Oct2024 git@github.com:breichl/FMS_Wave_Coupling.git
 
 Download and update the submodules:
 
@@ -29,13 +29,23 @@ Now you should be ready to compile.
 > Gaea Instructions:
 >
 > cd FMS_Wave_Coupling  
-> ./Wave_Compile.csh
+> ./FMScomp.csh
+> ./WW3comp.csh
+> ./MOM6comp.csh
+> ./WW3execcomp.csh
+
 
 If working on Gaea or the GFDL workstation, these steps should successfully compile libraries and executables needed to set-up and run the WW3 coupled system with FMS.
 
 ### Running - OM4_025.JRA example
 
-1. First follow the instructions to download the MOM6-examples input data (https://github.com/NOAA-GFDL/MOM6-examples/wiki/Getting-started#downloading-input-data).  Link this directory into the main directory for this repository as ".datasets", exactly as you would in MOM6-examples to use those test cases.  On gaea we simply execute "ln -sf /lustre/f2/pdata/gfdl/gfdl_O/datasets .datasets".  You would replace the source file location with the location you have put the datasets file you download.
+1. First follow the instructions to download the MOM6-examples input data (https://github.com/NOAA-GFDL/MOM6-examples/wiki/Getting-started#downloading-input-data).  Link this directory into the main directory for this repository as ".datasets", exactly as you would in MOM6-examples to use those test cases.  On gaea we simply execute "ln -sf <see location below> .datasets".  You would replace the source file location with the location you have put the datasets file you download.
+
+On f6:  
+>/gpfs/f6/gfdl/world-shared/gold/datasets
+
+On f5:  
+>/gpfs/f5/gfdl_o/world-shared/datasets  
 
 2. Change to the OM4_025.JRA test case directory
 
@@ -53,7 +63,7 @@ b. You will need to update the WW3 grid files in WW3/PreProc, see WW3/PreProc/Ge
 c. Next you need to create the mod_def.ww3 file for WW3's internal grid.  Navigate to WW3/PreProc and execute the ww3_grid (note on GFDL/Gaea you need to load the NetCDF libraries used to compile, e.g., on GFDL system: "module load netcdf/4.2" and on Gaea "module load cray-netcdf" before this will work):
 
 > cd WW3/PreProc  
-> ../../../../build/intel/wave_ice_ocean/ww3_grid/ww3_grid
+> ../../../../build/<compiler environment>/wave_ice_ocean/ww3_grid/ww3_grid
 
 2. Don't forget to create a RESTART directory within the OM4_025.JRA example directory:
 
@@ -64,13 +74,8 @@ c. Next you need to create the mod_def.ww3 file for WW3's internal grid.  Naviga
 > Gaea Instructions:
 >
 > cd examples/OM4_025.JRA  
-> salloc --clusters=c3 --qos=normal --nodes=10 --x11  
+> salloc --clusters=c6 --qos=normal --nodes=10 --x11  
 > srun -n320 ../../build/intel/wave_ice_ocean/repro/MOM6
-
-On the GFDL workstation I am using custom installed MPI libraries.  This will have to be reproduced for your own set-up.
-
-From the examples/Idealized_Hurricane/0p5 directory:
->  /net2/bgr/Software/build/bin/mpirun -n 4 ../../../build/intel/wave_ice_ocean/repro/MOM6
 
 5.  If this works, then congratulations, you have successful set-up, compiled, and run this example.  There is much more we can do with this including customizing set-ups, and processing and manipulating output.  Adding more instructions to this README.md is always welcome!
 
