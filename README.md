@@ -45,8 +45,11 @@ Note that when you create the passphrase for the key, it is recommended to use s
 >
 > cd FMS_Wave_Coupling  
 > ./FMScomp.csh
+> 
 > ./WW3comp.csh
+> 
 > ./MOM6comp.csh
+> 
 > ./WW3execcomp.csh
 
 
