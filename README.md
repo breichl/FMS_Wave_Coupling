@@ -14,6 +14,13 @@ Download and update the submodules:
 
 Now you should be ready to compile.
 
+If you receive an error of 
+
+>git@github.com: Permission denied (publickey).
+>fatal: Could not read from remote repoaitory.
+
+It might be due to your SSH key, please follow the link below to add a new SSH key to your GitHub account. Before adding the new key to your account, please check the Prerequisites (i.e. Checking for the existing SSH keys and Generate a new SSH key and add it to your machine's SSH agent):
+https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
 
 ### Compiling on Gaea
 
