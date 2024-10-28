@@ -32,7 +32,7 @@ Note that when you create the passphrase for the key, it is recommended to use s
 > cd FMS_Wave_Coupling  
 > ./Set_Up_WW3.csh
 
-2. The second step is to compile.  Again, a script to do this is provided for GFDL and Gaea.  This script will compile 1) FMS library, 2) ww3_grid, 3) ww3_prnc, 4) ww3_multi, 5) WW3 library (for linking within coupled model), 6) the coupled model , and 7) ww3_ounf. You need to create the soft link to the compile file:
+2. The second step is to compile.  Again, a script to do this is provided for GFDL and Gaea.  This script will compile 1) FMS library, 2) ww3_grid, 3) ww3_prnc, 4) ww3_multi, 5) WW3 library (for linking within coupled model), 6) the coupled model , and 7) ww3_ounf. You need to create the soft link to the compile file (this works for both C5 and C6 clusters):
 >ln -sf tools/FMScomp.csh FMScomp.csh
 
 >ln -sf tools/WW3comp.csh WW3comp.csh
