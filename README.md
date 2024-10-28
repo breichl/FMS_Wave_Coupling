@@ -40,6 +40,9 @@ Note that when you create the passphrase for the key, it is recommended to use s
 >ln -sf tools/MOM6comp.csh MOM6comp.csh
 
 >ln -sf tools/WW3execcomp.csh WW3execcomp.csh
+>
+>ln -sf tools/envs.ncrc6.intel23 envs.ncrc6.intel23
+
 
 > Gaea Instructions:
 >
