@@ -56,17 +56,19 @@ Note that when you create the passphrase for the key, it is recommended to use s
 > ./WW3execcomp.csh
 
 
-If working on Gaea or the GFDL workstation, these steps should successfully compile libraries and executables needed to set-up and run the WW3 coupled system with FMS.
+If working on Gaea or the GFDL workstation, these steps should successfully compile libraries and executables needed to set-up and run the WW3 coupled system with FMS. You can check by run:
+>cd FMS_Wave_Coupling
+>ls build/ncrc6.intel23/wave_ice_ocean/REPRO/MOM6
 
 ### Running - OM4_025.JRA example
 
 1. First follow the instructions to download the MOM6-examples input data (https://github.com/NOAA-GFDL/MOM6-examples/wiki/Getting-started#downloading-input-data).  Link this directory into the main directory for this repository as ".datasets", exactly as you would in MOM6-examples to use those test cases.  On gaea we simply execute "ln -sf <see location below> .datasets".  You would replace the source file location with the location you have put the datasets file you download.
 
 On f6:  
->/gpfs/f6/gfdl/world-shared/gold/datasets
+>ln -sf /gpfs/f6/gfdl/world-shared/gold/datasets .datasets
 
 On f5:  
->/gpfs/f5/gfdl_o/world-shared/datasets  
+>ln -sf /gpfs/f5/gfdl_o/world-shared/datasets .datasets
 
 2. Change to the OM4_025.JRA test case directory
 
@@ -74,7 +76,7 @@ On f5:
 
 2. We next have to set-up the grid.
 
-a. (Optional) If you are on a system that has access to the FMS/FRE tools, you can build your own grids and exchange grids (these tools are available on NOAA/GFDL github: FRE-NCtools).  See the GRID directory for some ideas of how these grids can be created to work with the wave model.  You would need to run the BuildExchangeGrid.csh and WaveMosaics.py (cshell and python) scripts both to create all necesssary files (there are some pseudo-hacks needed to set-up the grid_spec.nc and the wave related exchange grids, if you are having trouble getting the wind into the wave model this grid_spec step is critical).  But, this is all optional, you can simply run with the example here to have a 0p25 degree resolution case on the MOM6 native 1/4 degree grid.  
+a. (Optional) If you are on a system that has access to the FMS/FRE tools, you can build your own grids and exchange grids (these tools are available on NOAA/GFDL github: FRE-NCtools).  See the GRID directory for some ideas of how these grids can be created to work with the wave model.  You would need to run the BuildExchangeGrid.csh and WaveMosaics.py (cshell and python) scripts both to create all necesssary files (there are some pseudo-hacks needed to set-up the grid_spec.nc and the wave related exchange grids, if you are having trouble getting the wind into the wave model this grid_spec step is critical). The exchange grids can be generated at OM4_025.JRA/INPUT/EXCHANGE_GRIDS. To run BuildExchangeGrid.csh, you have to copy the BUildExchangeGrid.csh at FMS_Wave_Coupling/examples/Baltic_OM4_025/INPUT/ExchangeGrids and make some edits with the correct fre/bronx version. Also, You might not want to run this on a single login node, it is highly recommended to run this on parallel (using srun). But, this is all optional, you can simply run with the example here to have a 0p25 degree resolution case on the MOM6 native 1/4 degree grid.  
 
 b. You will need to update the WW3 grid files in WW3/PreProc, see WW3/PreProc/GenGrid.py for an example (this script should create the basic files for you without modification). This generates the WW3 Depth grid for a curvilinear tripolar grid on the MOM6 native 1/4 degree grid.  
 
