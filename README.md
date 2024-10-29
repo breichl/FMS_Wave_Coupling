@@ -88,7 +88,9 @@ b. You will need to update the WW3 grid files in WW3/PreProc, see WW3/PreProc/Ge
 c. Next you need to create the mod_def.ww3 file for WW3's internal grid.  Navigate to WW3/PreProc and execute the ww3_grid (note on GFDL/Gaea you need to load the NetCDF libraries used to compile, e.g., on GFDL system: "module load netcdf/4.2" and on Gaea "module load cray-netcdf" before this will work):
 
 > cd WW3/PreProc  
-> ../../../../build/<compiler environment>/wave_ice_ocean/ww3_grid/ww3_grid
+> ../../../../build/ncrc6.intel23/ww3_grid/ww3_grid
+
+Please replace "ncrc6.intel23" with your compiler environment.
 
 2. Don't forget to create a RESTART directory within the OM4_025.JRA example directory:
 
