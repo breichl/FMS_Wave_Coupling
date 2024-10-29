@@ -46,7 +46,8 @@ Note that when you create the passphrase for the key, it is recommended to use s
 
 > Gaea Instructions:
 >
-> cd FMS_Wave_Coupling  
+> cd FMS_Wave_Coupling
+> 
 > ./FMScomp.csh
 > 
 > ./WW3comp.csh
@@ -58,6 +59,7 @@ Note that when you create the passphrase for the key, it is recommended to use s
 
 If working on Gaea or the GFDL workstation, these steps should successfully compile libraries and executables needed to set-up and run the WW3 coupled system with FMS. You can check by run:
 >cd FMS_Wave_Coupling
+>
 >ls build/ncrc6.intel23/wave_ice_ocean/REPRO/MOM6
 
 ### Running - OM4_025.JRA example
