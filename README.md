@@ -93,7 +93,8 @@ c. Next you need to create the mod_def.ww3 file for WW3's internal grid.  Naviga
 Please replace "ncrc6.intel23" with your compiler environment.
 
 2. Don't forget to create a RESTART directory within the OM4_025.JRA example directory:
-
+>cd examples/OM4_025.JRA
+>
 > mkdir RESTART
 
 4.  Now we should be ready to run.  To run on Gaea we can either submit a job through the batch system, or run the job interactively.  In this example we are going to run it interactively.
@@ -102,7 +103,7 @@ Please replace "ncrc6.intel23" with your compiler environment.
 >
 > cd examples/OM4_025.JRA  
 > salloc --clusters=c6 --qos=normal --nodes=10 --x11  
-> srun -n320 ../../build/intel/wave_ice_ocean/repro/MOM6
+> srun -n 320 ../../build/ncrc6.intel23/wave_ice_ocean/REPRO/MOM6
 
 5.  If this works, then congratulations, you have successful set-up, compiled, and run this example.  There is much more we can do with this including customizing set-ups, and processing and manipulating output.  Adding more instructions to this README.md is always welcome!
 
