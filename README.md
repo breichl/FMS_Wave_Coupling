@@ -68,9 +68,13 @@ If working on Gaea or the GFDL workstation, these steps should successfully comp
 1. First follow the instructions to download the MOM6-examples input data (https://github.com/NOAA-GFDL/MOM6-examples/wiki/Getting-started#downloading-input-data).  Link this directory into the main directory for this repository as ".datasets", exactly as you would in MOM6-examples to use those test cases.  On gaea we simply execute "ln -sf <see location below> .datasets".  You would replace the source file location with the location you have put the datasets file you download.
 
 On f6:  
+>cd FMS_Wave_Coupling
+>
 >ln -sf /gpfs/f6/gfdl/world-shared/gold/datasets .datasets
 
 On f5:  
+>cd FMS_Wave_Coupling
+>
 >ln -sf /gpfs/f5/gfdl_o/world-shared/datasets .datasets
 
 2. Change to the OM4_025.JRA test case directory
