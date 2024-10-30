@@ -106,6 +106,24 @@ Please replace "ncrc6.intel23" with your compiler environment.
 > salloc --clusters=c6 --qos=normal --nodes=10 --x11  
 > srun -n 320 ../../build/ncrc6.intel23/wave_ice_ocean/REPRO/MOM6
 
-5.  If this works, then congratulations, you have successful set-up, compiled, and run this example. There is much more we can do with this including customizing set-ups, and processing and manipulating output.  Adding more instructions to this README.md is always welcome!
+5.  If this works, then congratulations, you have successful set-up, compiled, and run this example. If you succeded in running the exmaple but run into the errors at the MPI finalize, like below:
+>forrtl: severe (174): SIGSEGV, segmentation fault occurred
+>Image              PC                Routine            Line        Source             
+>libpthread-2.31.s  00007F663D2DF910  Unknown               Unknown  Unknown
+>libmlx5.so.1.24.4  00007F663AA4DC4B  Unknown               Unknown  Unknown
+>libmlx5.so.1.24.4  00007F663AA9881A  Unknown               Unknown  Unknown
+>libfabric.so.1.23  00007F663B0BEA73  Unknown               Unknown  Unknown
+>libfabric.so.1.23  00007F663B0C7CF7  Unknown               Unknown  Unknown
+>libfabric.so.1.23  00007F663B0D193C  Unknown               Unknown  Unknown
+>libfabric.so.1.23  00007F663B0D23EB  Unknown               Unknown  Unknown
+>libfabric.so.1.23  00007F663B0D4DD4  Unknown               Unknown  Unknown
+>libmpi_intel.so.1  00007F663F895FFE  Unknown               Unknown  Unknown
+>libmpi_intel.so.1  00007F663F6E9484  Unknown               Unknown  Unknown
+>libmpi_intel.so.1  00007F663E174854  MPI_Finalize          Unknown  Unknown
+>libmpifort_intel.  00007F664007D2B9  pmpi_finalize__       Unknown  Unknown
 
-6.  Basic instructions for creating WW3 output files:  MOM6 creates output in an easy to use netCDF format, but WW3 output is stored as binary files which need a further processing step to convert to netCDF.  You should have all the tools to do this already in place.  All you need to do is navigate to WW3/PostProc, and find the build/intel/wave_ice_ocean/ww3_ounf/ww3_ounf executable.  If you run it in this place, the proper files should already be linked to create netCDF from the mod_def and out_grd files.  Note that the ww3_ounf.inp can be edited (along with ww3_multi.inp) to specify diagnostics to save and frequency.  More information can be found in the WW3 directory.
+You need to add one line before you start running the MOM6 excutable: 
+>export FI_VERBS_PREFER_XRC=0
+There is much more we can do with this including customizing set-ups, and processing and manipulating output.  Adding more instructions to this README.md is always welcome!
+
+6. Basic instructions for creating WW3 output files:  MOM6 creates output in an easy to use netCDF format, but WW3 output is stored as binary files which need a further processing step to convert to netCDF.  You should have all the tools to do this already in place.  All you need to do is navigate to WW3/PostProc, and find the build/intel/wave_ice_ocean/ww3_ounf/ww3_ounf executable.  If you run it in this place, the proper files should already be linked to create netCDF from the mod_def and out_grd files.  Note that the ww3_ounf.inp can be edited (along with ww3_multi.inp) to specify diagnostics to save and frequency.  More information can be found in the WW3 directory.
