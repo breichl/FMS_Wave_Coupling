@@ -5,6 +5,7 @@
 To clone this repository from github use the following:
 
 > Using https:
+> 
 > git clone --branch Oct2024 git@github.com:breichl/FMS_Wave_Coupling.git
 
 Download and update the submodules:
