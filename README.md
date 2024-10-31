@@ -144,6 +144,7 @@ You need to add one line before you start running the MOM6 excutable:
 >export FI_VERBS_PREFER_XRC=0
 >
 In C6 platform, if you encountered any problems with "fatal OVERFLOW buffer list exhausted", try to use the code in the directory of Examples/OM4_025.JRA before you run the case:
+
 >export FI_CXI_RX_MATCH_MODE=hybrid
 
 There is much more we can do with this including customizing set-ups, and processing and manipulating output.  Adding more instructions to this README.md is always welcome!
