@@ -143,6 +143,9 @@ You need to add one line before you start running the MOM6 excutable:
 
 >export FI_VERBS_PREFER_XRC=0
 >
+In C6 platform, if you encountered any problems with "fatal OVERFLOW buffer list exhausted", try to use the code in the directory of Examples/OM4_025.JRA before you run the case:
+>export FI_CXI_RX_MATCH_MODE=hybrid
+
 There is much more we can do with this including customizing set-ups, and processing and manipulating output.  Adding more instructions to this README.md is always welcome!
 
 6. Basic instructions for creating WW3 output files:  MOM6 creates output in an easy to use netCDF format, but WW3 output is stored as binary files which need a further processing step to convert to netCDF.  You should have all the tools to do this already in place.  All you need to do is navigate to WW3/PostProc, and find the build/intel/wave_ice_ocean/ww3_ounf/ww3_ounf executable.  If you run it in this place, the proper files should already be linked to create netCDF from the mod_def and out_grd files.  Note that the ww3_ounf.inp can be edited (along with ww3_multi.inp) to specify diagnostics to save and frequency.  More information can be found in the WW3 directory.
