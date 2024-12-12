@@ -3,7 +3,7 @@
 	url = https://github.com/NOAA-GFDL/atmos_null.git
 [submodule "src/FMS"]
 	path = src/FMS
-	url = git@github.com:breichl/FMS.git
+	url = https://github.com/breichl/FMS.git
 [submodule "src/icebergs"]
 	path = src/icebergs
 	url = https://github.com/NOAA-GFDL/icebergs.git
@@ -15,16 +15,19 @@
 	url = https://github.com/NOAA-GFDL/land_null.git
 [submodule "src/mkmf"]
 	path = src/mkmf
-	url = https://github.com/NOAA-GFDL/mkmf.git
+	url = https://github.com/breichl/mkmf.git
 [submodule "src/MOM6"]
 	path = src/MOM6
-	url = git@github.com:breichl/MOM6.git
+	url = https://github.com/breichl/MOM6.git
 [submodule "src/SIS2"]
 	path = src/SIS2
 	url = https://github.com/NOAA-GFDL/SIS2.git
 [submodule "src/coupler"]
 	path = src/coupler
-	url = git@github.com:breichl/FMScoupler.git
+	url = https://github.com/breichl/FMScoupler.git
 [submodule "src/WW3"]
 	path = src/WW3
-	url = git@github.com:breichl/WW3.git
+	url = https://github.com/breichl/WW3.git
+[submodule "src/Icepack"]
+	path = src/Icepack
+	url = https://github.com/CICE-Consortium/Icepack.git

@@ -1,0 +1,12 @@
+! Blank file in which we can put "overrides" for parameters !VERBOSITY = 9
+#override NIGLOBAL = 560
+#override NJGLOBAL = 560
+USE_WAVES = True
+WAVE_METHOD = SURFACE_BANDS
+SURFBAND_SOURCE = COUPLER
+STK_BAND_COUPLER = 3
+#override REENTRANT_Y = False
+#override REENTRANT_X = False
+ROTATION = "betaplane"
+F_0 = 1.E-4
+BETA = 0.0
