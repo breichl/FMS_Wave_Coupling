@@ -6,7 +6,7 @@ To clone this repository from github use the following:
 
 > Using https:
 > 
-> git clone --branch Oct2024 git@github.com:breichl/FMS_Wave_Coupling.git
+> git clone https://github.com/breichl/FMS_Wave_Coupling.git
 
 Download and update the submodules:
 
@@ -15,15 +15,6 @@ Download and update the submodules:
 
 Now you should be ready to compile.
 
-If you receive an error of 
-
-> git@github.com: Permission denied (publickey)
-
-> fatal: Could not read from remote repository
-
-It might be due to your SSH key, please follow the link below to add a new SSH key to your GitHub account. Before adding the new key to your account, please check the Prerequisites (i.e. Checking for the existing SSH keys and Generate a new SSH key and add it to your machine's SSH agent):
-https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
-Note that when you create the passphrase for the key, it is recommended to use simple one or none as you need to type in it several times when git.
 ### Compiling on Gaea
 
 1. First step is to set up the wave model.  The wave model source code must be pre-processed using WAVEWATCH provided programs to convert to standard FORTRAN 90 files.  A sample script to complete this step is provided in "tools/SetUpWW3.csh", which works on Gaea and GFDL workstations to use a particular switch file and extract FORTRAN 90 code from the WW3 ftn code.  This script sets up code to compile WW3 preprocessor routines for building the grid binary (ww3_grid), the forcing binaries (ww3_prnc, needed for standalone WW3), and the stand alone WW3 driver (ww3_multi).  It also sets up code to compile WW3 postprocessor routines for converting the output binary into NetCDF (ww3_ounf).  Note that the wave model needs to know a valid compiler to unpack its "ftn" files into "f90" files, but you shouldn't need to use the same fortran compiler that you will use to create executables.
