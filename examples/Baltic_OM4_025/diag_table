@@ -1,13 +1,28 @@
 OM4_SIS2_cgrid_025
 1900 1 1 0 0 0
 
-"ocean_hourly",            1, "hours",   1, "days", "time"
+"day_mean",   1,"days",1,"days","Time"
 
-"ocean_model","SSV","SSV","ocean_hourly","all", "mean", "none",2
-"ocean_model","SSU","SSU","ocean_hourly","all", "mean", "none",2
-"ocean_model","surface_stokes_x","surface_stokes_x","ocean_hourly","all", "mean", "none",2
-"ocean_model","surface_stokes_y","surface_stokes_y","ocean_hourly","all", "mean", "none",2
-"ocean_model","SSS","SSS","ocean_hourly","all", "mean", "none",2
-"ocean_model","SST","SST","ocean_hourly","all", "mean", "none",2
-"ocean_model","ustar","ustar","ocean_hourly","all", "mean", "none",2
-"ocean_model","net_heat_surface","net_heat_surface","ocean_hourly","all", "mean", "none",2
+ "ocean_model",   "KPP_OBLdepth", "KPP_OBLdepth", "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "ePBL_h_ML", "ePBL_h_ML"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MLD_user", "MLD_user"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MLD_003", "MLD_003"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MLD_EN1", "MLD_EN1"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MLD_EN2", "MLD_EN2"    ,   "day_mean", "all", "mean", "none", 2
+ "ocean_model",   "MLD_0125", "MLD_0125"    ,   "day_mean", "all", "mean", "none", 2
+
+ "ocean_model", "3d_stokes_y_from_ddt", "3d_stokes_y_from_ddt",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "3d_stokes_x_from_ddt", "3d_stokes_x_from_ddt",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "dudt_Stokes", "dudt_Stokes",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "dvdt_Stokes", "dvdt_Stokes",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "3d_stokes_x", "3d_stokes_x",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "3d_stokes_y", "3d_stokes_y",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "surface_stokes_x", "surface_stokes_x",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "surface_stokes_y", "surface_stokes_y",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "PFv_Stokes", "PFv_Stokes",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "PFu_Stokes", "PFu_Stokes",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "CAv_Stokes", "CAv_Stokes",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "CAu_Stokes", "CAu_Stokes",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "P_deltaStokes_i", "P_deltaStokes_i",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "P_deltaStokes_L", "P_deltaStokes_L",   "day_mean", "all", "mean", "none", 2
+ "ocean_model", "La_turbulent" , "La_turbulent" ,   "day_mean", "all", "mean", "none", 2
