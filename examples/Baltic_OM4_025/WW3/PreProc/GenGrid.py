@@ -2,8 +2,8 @@ import numpy as np
 import netCDF4 as NC
 
 
-grid_handle = NC.Dataset ('ocean_hgrid.nc',mode = 'r' )
-topog_handle = NC.Dataset ('ocean_topog.nc',mode = 'r' )
+grid_handle = NC.Dataset ('wave_hgrid.nc',mode = 'r' )
+topog_handle = NC.Dataset ('wave_topog.nc',mode = 'r' )
 
 # 2. Read in Super Grid
 # 3. Read in Topog
