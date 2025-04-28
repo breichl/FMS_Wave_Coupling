@@ -27,7 +27,7 @@
 	url = https://github.com/breichl/FMScoupler.git
 [submodule "src/WW3"]
 	path = src/WW3
-	url = https://github.com/breichl/WW3.git
+	url = https://github.com/NOAA-EMC/WW3.git
 [submodule "src/Icepack"]
 	path = src/Icepack
 	url = https://github.com/CICE-Consortium/Icepack.git

@@ -21,8 +21,8 @@ mkdir -p build/${platform}/wave_ice_ocean/$version
 				       ../../../../src/coupler/{shared,full} \
 				       ../../../../src/SIS2/config_src/dynamic_symmetric \
                                        ../../../../src/SIS2/src \
-				       ../../../../src/{atmos_null,land_null,ice_param,WW3/model/CPL}/ \
+				       ../../../../src/{atmos_null,land_null,ice_param,WW3_CPL}/ \
 )
 (cd build/${platform}/wave_ice_ocean/$version/; \
-../../../../src/mkmf/bin/mkmf -t ../../../../src/mkmf/templates/ncrc-intel.mk -o "-I../../fms/${version} -I../../ww3lib/${version}" -p MOM6 -l "-L../../fms/${version} -lfms -L../../ww3lib/${version} -lww3" -c '-Duse_AM3_physics -D_USE_LEGACY_LAND_ -DUSE_FMS2_IO' path_names )
+../../../../src/mkmf/bin/mkmf -t ../../../../src/mkmf/templates/ncrc-intel.mk -o "-I../../fms/${version} -I../../ww3lib/${version}/model/src/mod" -p MOM6 -l "-L../../fms/${version} -lfms -L../../ww3lib/${version}/lib -lww3" -c '-Duse_AM3_physics -D_USE_LEGACY_LAND_ -DUSE_FMS2_IO' path_names )
 (cd build/${platform}/wave_ice_ocean/$version/; make NETCDF=3 $version=1 MOM6 -j)
