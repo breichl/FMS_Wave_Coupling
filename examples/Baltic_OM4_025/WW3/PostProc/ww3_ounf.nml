@@ -52,7 +52,7 @@
 &FIELD_NML
   FIELD%TIMESTART        =  '19580101 000000'
   FIELD%TIMESTRIDE       =  '3600'
-  FIELD%LIST             =  'DPT WND HS USP'
+  FIELD%LIST             =  'DPT WND HS USP USST'
   FIELD%SAMEFILE         =  T
   FIELD%TYPE             =  4
   FIELD%FCVARS           =  F

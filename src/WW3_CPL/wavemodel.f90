@@ -8,13 +8,20 @@ module wave_model_mod
 
   use time_manager_mod, only: time_type, operator(+), get_date
 
-  USE WMMDATMD, ONLY: MDSI, MDSO, MDSS, MDST, MDSE, &
-                      NMPROC, IMPROC, NMPSCR, NRGRD, ETIME
+  USE WMMDATMD, ONLY: &
+       MDSI, &  ! Unit number for input file.
+       MDSO, &  ! Unit number for output (log file).
+       MDSS, &  ! Unit number for output (screen).
+       MDST, &  ! Unit number for test output.
+       MDSE, &  ! Unit number for error output.
+       NMPROC, &! Number of processors (for total multi-grid model).
+       IMPROC, &! Corresponding actual processor number.
+       NRGRD    ! Number of grids
 
 
   implicit none
 
-  INTEGER, ALLOCATABLE :: TEND(:,:), TSTRT(:,:)
+  INTEGER, ALLOCATABLE :: time_wave_end(:,:), time_wave_start(:,:)
   INTEGER              :: MPI_COMM = -99
 
   contains
@@ -29,6 +36,12 @@ module wave_model_mod
       use wminitmd, only: wminit, wminitnml
       use w3gdatmd, only: NX, NY
       use w3gdatmd, only: usspf, ussp_wn
+      use w3wdatmd, only: va
+      USE W3IOGOMD, ONLY: calc_u3stokes
+      use w3adatmd, only: ussp, usstx, ussty, CG
+      use w3gdatmd, only: nseal, mapsf, NK
+      use w3odatmd, only: iaproc, naproc
+      use constants, only : GRAV
 
       ! Subroutine arguments
       type(atmos_wave_boundary_type), intent(inout)  :: Atm2Waves
@@ -39,6 +52,13 @@ module wave_model_mod
       logical              :: Flag_NML
       INTEGER              :: Ierr_MPI
       integer :: layout(2)
+
+      ! Local parameters
+      integer :: i, year, month, day, hour, minute, second, is, ie, js, je
+      integer :: jsea, isea, isea_global, ix, iy, jx, jy, pix, piy
+      integer :: b
+
+      integer, allocatable :: glob_loc_x(:,:), glob_loc_y(:,:)
 
       !----------------------------------------------------------------------
       !This block of code checks if the wave model has been initialized
@@ -74,7 +94,7 @@ module wave_model_mod
       ELSE
         CALL WMINIT ( MDSI, MDSO, MDSS, 10, MDSE, 'ww3_multi.inp', MPI_COMM )
       END IF
-      ALLOCATE ( TEND(2,NRGRD), TSTRT(2,NRGRD) )
+      ALLOCATE ( time_wave_end(2,NRGRD), time_wave_start(2,NRGRD) )
       !----------------------------------------------------------------------
 
       !----------------------------------------------------------------------
@@ -85,10 +105,10 @@ module wave_model_mod
 
       !
       !This block of code sets up the global coupler domains
-      allocate(Atm2Waves%wavgrd_u10_glo(1:NX,1:NY,1))
-      Atm2Waves%wavgrd_u10_glo(1:NX,1:NY,1) = 0.0
-      allocate(Atm2Waves%wavgrd_v10_glo(1:NX,1:NY,1))
-      Atm2Waves%wavgrd_v10_glo(1:NX,1:NY,1) = 0.0
+      allocate(Atm2Waves%wavgrd_u10n_glo(1:NX,1:NY,1))
+      Atm2Waves%wavgrd_u10n_glo(1:NX,1:NY,1) = 0.0
+      allocate(Atm2Waves%wavgrd_v10n_glo(1:NX,1:NY,1))
+      Atm2Waves%wavgrd_v10n_glo(1:NX,1:NY,1) = 0.0
       allocate(Ice2Waves%wavgrd_ucurr_glo(1:NX,1:NY,1))
       Ice2Waves%wavgrd_ucurr_glo(1:NX,1:NY,1) = 0.0
       allocate(Ice2Waves%wavgrd_vcurr_glo(1:NX,1:NY,1))
@@ -109,6 +129,109 @@ module wave_model_mod
       Wav%ustkb_glo(:,:,:) = 0.0
       allocate(Wav%vstkb_glo(1:NX,1:NY,Wav%num_stk_bands))
       Wav%vstkb_glo(:,:,:) = 0.0
+      allocate(Wav%ustktail_glo(1:NX,1:NY))
+      Wav%ustktail_glo(:,:) = 0.0
+      allocate(Wav%vstktail_glo(1:NX,1:NY))
+      Wav%vstktail_glo(:,:) = 0.0
+
+      call mpp_get_compute_domain( Wav%domain, is, ie, js, je )
+
+      allocate( wav%ustkb_mpp(is:ie,js:je,wav%num_stk_bands) )
+      wav%ustkb_mpp(:,:,:) = 0.0
+      allocate( wav%vstkb_mpp(is:ie,js:je,wav%num_stk_bands) )
+      wav%vstkb_mpp(:,:,:) = 0.0
+      allocate( wav%ustktail_mpp(is:ie,js:je) )
+      wav%ustktail_mpp(:,:) = 0.0
+      allocate( wav%vstktail_mpp(is:ie,js:je) )
+      wav%vstktail_mpp(:,:) = 0.0
+
+      ! This are a temporary and costly trick to make MPI work
+      allocate( wav%glob_loc_X(is:ie,js:je) )
+      wav%glob_loc_X(:,:) = 0
+      allocate( wav%glob_loc_Y(is:ie,js:je) )
+      wav%glob_loc_Y(:,:) = 0
+      allocate( glob_loc_X(1:NX,1:NY) )
+      glob_loc_X(:,:) = 0
+      allocate( glob_loc_Y(1:NX,1:NY) )
+      glob_loc_Y(:,:) = 0
+
+      ! This will update Stokes drift from restart file, if it existed.
+      call calc_u3stokes(va,2)
+
+      ! Zero out arrays that tell us which location are on which processor
+      Wav%glob_loc_X(:,:) = 0
+      Wav%glob_loc_Y(:,:) = 0
+
+      ! This loop is a bit of a hack because wavewave iii uses a card deck domain
+      ! but we want to convert the wave model data back to a standard domain
+      ! decomposition in order to work with FMS mpp routines.
+      ! We need to first write the data from WW3 to a standard domain, even though
+      ! at this point we know the data is in the wrong place for the global array.
+      ! This step allows us to put all the data onto a global temporary array,
+      ! where it will be shuffled.  We store the correct array indices in this step
+      ! so we can come back and unshuffled.
+
+      isea = 1
+      ! Looping over local is,ie and js,je on the standard decomposed arrays
+      do ix=is,ie
+        do iy=js,je
+          ! nseal is the number of sea-points on this processor
+          if (isea<=nseal) then
+            !isea_global is the seapoint index on a global 1d array of seapoints
+            !IAPROC is processor number of this element
+            !NAPROC is number of WW3 total processors
+            isea_global   = IAPROC + (isea-1)*NAPROC
+            ! MAPSF is a 2darray with the x and y global array indices
+            !  as a function of the global sea-point number
+            jx = MAPSF(isea_global,1)
+            jy = MAPSF(isea_global,2)
+            ! This maps the local ix/iy position to the global jx/jy index
+            Wav%glob_loc_X(ix,iy) = jx
+            Wav%glob_loc_Y(ix,iy) = jy
+            ! filling the local ix/iy arrays from the 1d isea arrays
+            Wav%ustktail_mpp(ix,iy) = usstx(isea)
+            Wav%vstktail_mpp(ix,iy) = ussty(isea)
+            do b=1,Wav%num_stk_bands
+              Wav%ustkb_mpp(ix,iy,b) = ussp(isea,b)
+              Wav%vstkb_mpp(ix,iy,b) = ussp(isea,NK+b)
+           enddo
+          endif ! could add an else with an exit from the outside ix loop?
+          isea = isea+1
+        end do
+      end do
+
+
+      ! Now we do the MPP sum operations to aggregate the local arrays onto the global arrays
+      do b = 1,Wav%num_stk_bands
+        call mpp_global_field(Wav%domain,Wav%ustkb_mpp(:,:,b),wav%ustkb_glo(:,:,b))
+        call mpp_global_field(Wav%domain,Wav%vstkb_mpp(:,:,b),wav%vstkb_glo(:,:,b))
+      enddo
+      call mpp_global_field(Wav%domain,Wav%ustktail_mpp(:,:),wav%ustktail_glo(:,:))
+      call mpp_global_field(Wav%domain,Wav%vstktail_mpp(:,:),wav%vstktail_glo(:,:))
+      call mpp_global_field(Wav%domain,Wav%glob_loc_X,glob_loc_X)
+      call mpp_global_field(Wav%domain,Wav%glob_loc_Y,glob_loc_Y)
+
+
+      ! Zero out the local arrays for the next time through
+      Wav%ustkb_mpp(:,:,:) = 0.0
+      Wav%vstkb_mpp(:,:,:) = 0.0
+      Wav%ustktail_mpp(:,:) = 0.0
+      Wav%vstktail_mpp(:,:) = 0.0
+
+
+      isea = 1
+      do ix=1,NX
+        do iy=1,NY
+          Pix = glob_loc_X(ix,iy)
+          Piy = glob_loc_Y(ix,iy)
+          if (Pix>=is .and. Pix<=ie .and. Piy>=js .and. Piy<=je) then
+             do b = 1,Wav%num_stk_bands
+               Wav%ustkb_mpp(Pix,Piy,b) = wav%ustkb_glo(ix,iy,b)
+               Wav%vstkb_mpp(Pix,Piy,b) = wav%vstkb_glo(ix,iy,b)
+             enddo
+          endif
+        enddo
+      enddo
 
       return
     end subroutine wave_model_init
@@ -124,94 +247,127 @@ module wave_model_mod
       use w3gdatmd, only: NX, NY
       use w3idatmd, only: wx0, wxN, wy0, wyN, TW0, TWN, &
                           cx0, cxN, cy0, cyN, TC0, TCN
-      use w3adatmd, only: ussx, ussy, ussp
+      use w3adatmd, only: ussp, usstx, ussty
       use w3gdatmd, only: nseal, mapsf, NK
       use w3odatmd, only: iaproc, naproc
       ! Subroutine arguments
       type(atmos_wave_boundary_type), intent(in) :: Atm2Waves
       type(ice_wave_boundary_type),   intent(in) :: Ice2Waves
       type(wave_data_type),        intent(inout) :: Wav
-      type(time_type),                intent(in) :: Time_start,&
-                                                    Time_increment
+      type(time_type),                intent(in) :: time_start,&
+                                                    time_increment
 
       ! Local parameters
-      integer :: I, yr, mo, da, hr, mi, se, is, ie, js, je
-      integer :: isea, isea_g, ix, iy, jx, jy, pix, piy
+      integer :: i, year, month, day, hour, minute, second, is, ie, js, je
+      integer :: isea, isea_global, ix, iy, jx, jy, pix, piy
       integer :: b
 
       integer :: glob_loc_x(NX,NY), glob_loc_y(NX,NY)
 
-      !----------------------------------------------------------------------
-      !Convert the ending time of this call into WW3 time format, which
+      ! Convert the ending time of this call into WW3 time format, which
       ! is integer(2) :: (YYYYMMDD, HHMMSS)
-      DO I=1, NRGRD
-        call get_date(Time_start,&
-             yr,mo,da,hr,mi,se)
-        TSTRT(1,I) = yr*1e4+mo*1e2+da
-        TSTRT(2,I) = hr*1e4+mi*1e2+se
-        call get_date(Time_start+Time_increment,&
-             yr,mo,da,hr,mi,se)
-        TEND(1,I) = yr*1e4+mo*1e2+da
-        TEND(2,I) = hr*1e4+mi*1e2+se
-      END DO
-      !----------------------------------------------------------------------
+      do i=1, nrgrd
+        call get_date(time_start,year,month,day,hour,minute,second)
+        time_wave_start(1,I) = year*1e4 + month*1e2 + day
+        time_wave_start(2,I) = hour*1e4 + minute*1e2 + second
+        call get_date(time_start+time_increment,year,month,day,hour,minute,second)
+        time_wave_end(1,I) = year*1e4 + month*1e2 +day
+        time_wave_end(2,I) = hour*1e4 + minute*1e2 + second
+      enddo
 
-      !----------------------------------------------------------------------
-      !Call WW3 timestepper with an argument for the time to return
-      ! back
-      TW0(:) = TSTRT(:,1)
-      TWN(:) = TEND(:,1)
-      TC0(:) = TSTRT(:,1)
-      TCN(:) = TEND(:,1)
-      call mpp_global_field(Wav%domain,atm2waves%wavgrd_u10_mpp(:,:,:),atm2waves%wavgrd_u10_glo(:,:,:))
-      wx0(:,:) = atm2waves%wavgrd_u10_glo(:,:,1)
-      wxN(:,:) = wx0(:,:)
-      call mpp_global_field(Wav%domain,atm2waves%wavgrd_v10_mpp(:,:,:),atm2waves%wavgrd_v10_glo(:,:,:))
-      wy0(:,:) = atm2waves%wavgrd_v10_glo(:,:,1)
-      wyN(:,:) = wy0(:,:)
+
+      ! Call WW3 timestepper with an argument for the time to return
+      TW0(:) = time_wave_start(:,1) !< Time for wind start
+      TWN(:) = time_wave_end(:,1)   !< Time for wind end
+      TC0(:) = time_wave_start(:,1) !< Time for current start
+      TCN(:) = Time_wave_end(:,1)   !< Time for current end
+
+      ! Populate the wind and currents from processor only arrays to global arrays
+      ! The wind at beginning of the time step and end of the time step are the same.
+      call mpp_global_field(Wav%domain,atm2waves%wavgrd_u10n_mpp(:,:,:),atm2waves%wavgrd_u10n_glo(:,:,:))
+      call mpp_global_field(Wav%domain,atm2waves%wavgrd_v10n_mpp(:,:,:),atm2waves%wavgrd_v10n_glo(:,:,:))
       call mpp_global_field(Wav%domain,ice2waves%wavgrd_ucurr_mpp(:,:,:),ice2waves%wavgrd_ucurr_glo(:,:,:))
+      call mpp_global_field(Wav%domain,ice2waves%wavgrd_vcurr_mpp(:,:,:),ice2waves%wavgrd_vcurr_glo(:,:,:))
+
+      wx0(:,:) = atm2waves%wavgrd_u10n_glo(:,:,1)
+      wxN(:,:) = wx0(:,:)
+      wy0(:,:) = atm2waves%wavgrd_v10n_glo(:,:,1)
+      wyN(:,:) = wy0(:,:)
       cx0(:,:) = ice2waves%wavgrd_ucurr_glo(:,:,1)
       cxN(:,:) = cx0(:,:)
-      call mpp_global_field(Wav%domain,ice2waves%wavgrd_vcurr_mpp(:,:,:),ice2waves%wavgrd_vcurr_glo(:,:,:))
       cy0(:,:) = ice2waves%wavgrd_vcurr_glo(:,:,1)
       cyN(:,:) = cy0(:,:)
+
       ! write(*,*)'Into wave model U10 max: ',maxval(atm2Waves%U_10_global),maxval(wx0)
       ! write(*,*)'Into wave model V10 max: ',maxval(atm2Waves%V_10_global),maxval(wy0)
       ! write(*,*)'Into wave model UO max: ',maxval(ice2Waves%Ucurr_global),maxval(cx0)
       ! write(*,*)'Into wave model VO max: ',maxval(ice2Waves%Vcurr_global),maxval(cy0)
-      CALL WMWAVE ( TEND )
 
+      ! Call the wave model and execute a time step
+      CALL WMWAVE ( time_wave_end )
+
+      ! Zero out arrays that tell us which location are on which processor
       Wav%glob_loc_X(:,:) = 0
       Wav%glob_loc_Y(:,:) = 0
 
+      ! Get the starting and ending i and j indices from the wave model domain
       call mpp_get_compute_domain( Wav%domain, is, ie, js, je )
+
+      ! This loop is a bit of a hack because wavewave iii uses a card deck domain
+      ! but we want to convert the wave model data back to a standard domain
+      ! decomposition in order to work with FMS mpp routines.
+      ! We need to first write the data from WW3 to a standard domain, even though
+      ! at this point we know the data is in the wrong place for the global array.
+      ! This step allows us to put all the data onto a global temporary array,
+      ! where it will be shuffled.  We store the correct array indices in this step
+      ! so we can come back and unshuffled.
+
       isea = 1
+      ! Looping over local is,ie and js,je on the standard decomposed arrays
       do ix=is,ie
         do iy=js,je
+          ! nseal is the number of sea-points on this processor
           if (isea<=nseal) then
-            ISEA_G   = IAPROC + (ISEA-1)*NAPROC
-            jx = MAPSF(ISEA_G,1)
-            jy = MAPSF(ISEA_G,2)
+            !isea_global is the seapoint index on a global 1d array of seapoints
+            !IAPROC is processor number of this element
+            !NAPROC is number of WW3 total processors
+            isea_global   = IAPROC + (isea-1)*NAPROC
+            ! MAPSF is a 2darray with the x and y global array indices
+            !  as a function of the global sea-point number
+            jx = MAPSF(isea_global,1)
+            jy = MAPSF(isea_global,2)
+            ! This maps the local ix/iy position to the global jx/jy index
             Wav%glob_loc_X(ix,iy) = jx
             Wav%glob_loc_Y(ix,iy) = jy
+            ! filling the local ix/iy arrays from the 1d isea arrays
+            Wav%ustktail_mpp(ix,iy) = usstx(isea)
+            Wav%vstktail_mpp(ix,iy) = ussty(isea)
             do b=1,Wav%num_stk_bands
-              Wav%ustkb_mpp(ix,iy,b) = USSP(isea,b)
-              Wav%vstkb_mpp(ix,iy,b) = USSP(isea,NK+b)
-            enddo
-          endif
+              Wav%ustkb_mpp(ix,iy,b) = ussp(isea,b)
+              Wav%vstkb_mpp(ix,iy,b) = ussp(isea,NK+b)
+           enddo
+          endif ! could add an else with an exit from the outside ix loop?
           isea = isea+1
         end do
       end do
 
+      ! Now we do the MPP sum operations to aggregate the local arrays onto the global arrays
       do b = 1,Wav%num_stk_bands
         call mpp_global_field(Wav%domain,Wav%ustkb_mpp(:,:,b),wav%ustkb_glo(:,:,b))
         call mpp_global_field(Wav%domain,Wav%vstkb_mpp(:,:,b),wav%vstkb_glo(:,:,b))
       enddo
+      call mpp_global_field(Wav%domain,Wav%ustktail_mpp(:,:),wav%ustktail_glo(:,:))
+      call mpp_global_field(Wav%domain,Wav%vstktail_mpp(:,:),wav%vstktail_glo(:,:))
       call mpp_global_field(Wav%domain,Wav%glob_loc_X,glob_loc_X)
       call mpp_global_field(Wav%domain,Wav%glob_loc_Y,glob_loc_Y)
 
+
+      ! Zero out the local arrays for the next time through
       Wav%ustkb_mpp(:,:,:) = 0.0
       Wav%vstkb_mpp(:,:,:) = 0.0
+      Wav%ustktail_mpp(:,:) = 0.0
+      Wav%vstktail_mpp(:,:) = 0.0
+
 
       isea = 1
       do ix=1,NX
@@ -247,9 +403,9 @@ module wave_model_mod
       !----------------------------------------------------------------------
       !Finalize the driver
       CALL WMFINL
-      DEALLOCATE ( TEND, TSTRT )
-      deallocate(Atm2Waves%wavgrd_u10_glo)
-      deallocate(Atm2Waves%wavgrd_v10_glo)
+      DEALLOCATE ( time_wave_end, time_wave_start )
+      deallocate(Atm2Waves%wavgrd_u10n_glo)
+      deallocate(Atm2Waves%wavgrd_v10n_glo)
       deallocate(Ice2Waves%wavgrd_ucurr_glo)
       deallocate(Ice2Waves%wavgrd_vcurr_glo)
       CALL MPI_BARRIER ( MPI_COMM, IERR_MPI ) !Do we need this?
